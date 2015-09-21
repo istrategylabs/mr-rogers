@@ -1,0 +1,33 @@
+{
+  "name": "mr-rogers",
+  "version": "0.0.5",
+  "description": "Profanity filter",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/istrategylabs/mr-rogers.git"
+  },
+  "keywords": [
+    "profanity",
+    "filter",
+    "bad",
+    "words"
+  ],
+  "author": "ISL <dev@isl.co>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/istrategylabs/mr-rogers/issues"
+  },
+  "homepage": "https://github.com/istrategylabs/mr-rogers#readme",
+  "dependencies": {
+    "bluebird": "^2.10.0",
+    "kevin-johnson": "^0.1.0",
+    "string": "^3.3.1"
+  },
+  "devDependencies": {
+    "tape": "^4.2.0"
+  }
+}
