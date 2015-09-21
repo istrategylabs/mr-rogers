@@ -8,7 +8,6 @@ var utils = require( './lib/utils' );
 
 module.exports = function( badWords ) {
 
-  var _resolver = P.pending();
   var _badWords = badWords;
 
   var _api = {
@@ -34,18 +33,8 @@ module.exports = function( badWords ) {
   };
 
   if ( !_badWords ) {
-    utils.fetchDefaultWords()
-      .then( function ( words ) {
-        _badWords = words;
-        _resolver.resolve( _api );
-      }).catch( function ( err ) {
-        _resolver.reject( err );
-      });
-  } else {
-    process.nextTick( function () {
-      _resolver.resolve( _api );
-    });
+    _badWords = utils.fetchDefaultWords();
   }
 
-  return _resolver.promise;
+  return _api;
 };
