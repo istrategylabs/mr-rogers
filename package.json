@@ -1,6 +1,6 @@
 {
   "name": "mr-rogers",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Profanity filter",
   "main": "index.js",
   "scripts": {

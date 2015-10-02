@@ -3,7 +3,7 @@
 
 var test      = require( 'tape' );
 var profanity = require( '../index' );
-var ctx       = require( '../../kevin-johnson' );
+var ctx       = require( 'kevin-johnson' );
 var opts = {
   appName: 'mr_rogers_test'
 };
