@@ -60,7 +60,7 @@ test('forbid a clean word', function ( t ) {
       mrRogers = ctrl;
       return mrRogers.useDefaults();
     }).then( function () {
-      return mrRogers.forbid( word );
+      return mrRogers.forbid( [ word ] );
     }).then( function () {
       return mrRogers.detect( text );
     }).then( function ( hasProfanity ) {

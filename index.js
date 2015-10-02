@@ -4,6 +4,7 @@
 var P     = require( 'bluebird' );
 var async = require( 'async' );
 var S     = require( 'string' );
+var check = require( 'check-types' );
 var utils;
 
 module.exports = function( opts ) {
@@ -38,38 +39,49 @@ module.exports = function( opts ) {
       return resolver.promise;
     },
 
-    allow: function( word ) {
+    allow: function( words ) {
+      words         = ( check.array( words ) ) ? words : [ words ];
       var resolver  = P.pending();
-      var index     = _badWords.indexOf( word );
+      var index;
+      var i;
 
-      if ( index === -1 ) {
-        _badWords.splice( index, 1 );
-        utils.persistWords( _badWords )
-          .then( function() {
-            resolver.resolve();
-          }).catch( function ( err ) {
-            resolver.reject( err );
-          });
-      } else {
-        resolver.resolve();
+      for ( i = 0; i < words.length; i++ ) {
+        index = _badWords.indexOf( words[ i ] );
+        if ( index > -1 ) {
+          _badWords.splice( index, 1 );
+        }
       }
+
+      utils.persistWords( _badWords )
+        .then( function() {
+          resolver.resolve();
+        }).catch( function ( err ) {
+          resolver.reject( err );
+        });
 
       return resolver.promise;
     },
 
-    forbid: function( forbidden ) {
+    forbid: function( words ) {
+      words    = ( check.array( words ) ) ? words : [ words ];
       var resolver = P.pending();
-      if ( _badWords.indexOf( forbidden ) === -1 ) {
-        _badWords.push( forbidden );
-        utils.persistWords( _badWords )
-          .then( function() {
-            resolver.resolve();
-          }).catch( function ( err ) {
-            resolver.reject( err );
-          });
-      } else {
-        resolver.resolve();
+      var index;
+      var i;
+
+      for ( i = 0; i < words.length; i++ ) {
+        index = _badWords.indexOf( words[ i ] );
+        if ( index === -1 ) {
+          _badWords.push( words[ i ] );
+        }
       }
+
+      utils.persistWords( _badWords )
+        .then( function() {
+          resolver.resolve();
+        }).catch( function ( err ) {
+          resolver.reject( err );
+        });
+
       return resolver.promise;
     },
 
