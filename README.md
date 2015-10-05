@@ -6,6 +6,8 @@ used by Google (for certain things) and was published by another dev
 
 http://fffff.at/googles-official-list-of-bad-words/
 
+ISL takes no position on the usage/context of the list provided. We provide the list "as is" and you should add/remove items as you see fit.
+
 ### Quick Start
 ```javascript
   // mr rogers uses a posgtres backed store
