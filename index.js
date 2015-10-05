@@ -97,6 +97,10 @@ module.exports = function( opts ) {
         });
       return resolver.promise;
     },
+
+    fetchForbidden: function() {
+      return _badWords;
+    }
   };
 
   utils.fetchStoredWords()
