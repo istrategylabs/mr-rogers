@@ -11,7 +11,7 @@ ISL takes no position on the usage/context of the list provided. We provide the 
 ### Quick Start
 ```javascript
   // mr rogers uses a posgtres backed store
-  var var profanity = require( 'mr-rogers' );
+  var profanity = require( 'mr-rogers' );
   var kevinJohnson = require( 'kevin-johnson' );
   var clean = 'some clean text';
   var dirty = 'some dirty ass text';
@@ -32,7 +32,6 @@ ISL takes no position on the usage/context of the list provided. We provide the 
 
   // you can add or remove to the list dynamically using allow and forbid
   mrRogers.allow( 'badword' ).then( ... );
-
   mrRogers.forbid( 'candy' ).then( ... );
 
   // you can always revert back to the original list (careful, you'll lose all previously made changes)
