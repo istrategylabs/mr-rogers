@@ -1,96 +1,96 @@
 
 'use strict';
 
-var test      = require( 'tape' );
-var profanity = require( '../index' );
-var ctx       = require( 'kevin-johnson' );
-var opts = {
+const test      = require( 'tape' );
+const profanity = require( '../index' );
+const ctx       = require( 'kevin-johnson' );
+const opts = {
   appName: 'mr_rogers_test'
 };
 
-var errorFunc = function( err ) {
+const errorFunc = ( err ) => {
   throw err;
 };
 
-test( 'clean text returns false', function ( t ) {
-  var text = 'Here is some clean text #obama';
-  var mrRogers;
+test( 'clean text returns false', ( t ) => {
+  const text = 'Here is some clean text #obama';
+  let   mrRogers;
 
   ctx( opts )
-    .then( function ( kj ) {
+    .then( ( kj ) => {
       return profanity( { kevinJohnson: kj } );
-      }).then( function ( m ) {
-        mrRogers = m;
-        return mrRogers.useDefaults();
-      }).then( function() {
-        return mrRogers.detect( text );
-      }).then( function ( hasProfanity ) {
-        t.equal( hasProfanity, false );
-        t.end();
-      }).catch( errorFunc );
-});
-
-test( 'dirty text returns true', function ( t ) {
-  var text = 'Here is some dirty fucking text';
-  var mrRogers;
-
-  ctx( opts )
-    .then( function ( kj ) {
-      return profanity( { kevinJohnson: kj } );
-    }).then( function ( m ) {
+    }).then( ( m ) => {
       mrRogers = m;
       return mrRogers.useDefaults();
-    }).then( function () {
+    }).then( () => {
       return mrRogers.detect( text );
-    }).then( function ( hasProfanity ) {
+    }).then( ( hasProfanity ) => {
+      t.equal( hasProfanity, false );
+      t.end();
+    }).catch( errorFunc );
+});
+
+test( 'dirty text returns true', ( t ) => {
+  const text = 'Here is some dirty fucking text';
+  let   mrRogers;
+
+  ctx( opts )
+    .then( ( kj ) => {
+      return profanity( { kevinJohnson: kj } );
+    }).then( ( m ) => {
+      mrRogers = m;
+      return mrRogers.useDefaults();
+    }).then( () => {
+      return mrRogers.detect( text );
+    }).then( ( hasProfanity ) => {
       t.equal( hasProfanity, true );
       t.end();
     }).catch( errorFunc );
 });
 
-test('forbid a clean word', function ( t ) {
-  var text = 'blah blah obama trump';
-  var word = 'obama';
-  var mrRogers;
+test('forbid a clean word', ( t ) => {
+  const text = 'blah blah obama trump';
+  const word = 'obama';
+  let   mrRogers;
 
   ctx( opts )
-    .then( function ( kj ) {
+    .then( ( kj ) => {
       return profanity( { kevinJohnson: kj } );
-    }).then( function ( ctrl ) {
+    }).then( ( ctrl ) => {
       mrRogers = ctrl;
       return mrRogers.useDefaults();
-    }).then( function () {
+    }).then( () => {
       return mrRogers.forbid( [ word ] );
-    }).then( function () {
+    }).then( () => {
       return mrRogers.detect( text );
-    }).then( function ( hasProfanity ) {
+    }).then( ( hasProfanity ) => {
       t.equal( hasProfanity, true );
       t.end();
     });
 });
 
-test('allow a dirty word', function ( t ) {
-  var text = 'blah blah obama trump';
-  var word = 'obama';
-  var mrRogers;
+test('allow a dirty word', ( t ) => {
+  const text = 'blah blah obama trump';
+  const word = 'obama';
+  let   mrRogers;
 
   ctx( opts )
-    .then( function ( kj ) {
+    .then( ( kj ) => {
       return profanity( { kevinJohnson: kj } );
-    }).then( function ( ctrl ) {
+    }).then( ( ctrl ) => {
       mrRogers = ctrl;
       return mrRogers.useDefaults();
-    }).then( function () {
+    }).then( () => {
       return mrRogers.allow( word );
-    }).then( function () {
+    }).then( () => {
       return mrRogers.detect( text );
-    }).then( function ( hasProfanity ) {
+    }).then( ( hasProfanity ) => {
       t.equal( hasProfanity, false );
       t.end();
     });
 });
 
-test('cleanup', function ( t ) {
+test('cleanup', ( t ) => {
   t.end();
   process.exit();
 });

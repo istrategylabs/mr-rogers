@@ -1,27 +1,27 @@
 
 'use strict';
 
-var P     = require( 'bluebird' );
-var async = require( 'async' );
-var S     = require( 'string' );
-var check = require( 'check-types' );
-var utils;
+const P     = require( 'bluebird' );
+const async = require( 'async' );
+const S     = require( 'string' );
+const check = require( 'check-types' );
+let utils;
 
-module.exports = function( opts ) {
+module.exports = ( opts ) => {
   opts = opts || {};
-  var _initResolver = P.pending();
-  var _badWords = opts.badWords;
-  var kj        = opts.kevinJohnson;
-  var key       = opts.key = 'mr_rogers_banned';
+  const _initResolver = P.pending();
+  let   _badWords     = opts.badWords;
+  const kj            = opts.kevinJohnson;
+  const key           = opts.key = 'mr_rogers_banned';
 
   utils = require( './lib/utils' )( kj, key );
 
-  var _api = {
-    detect: function( text ) {
-      var resolver = P.pending();
-      var searchable = S( text.toLowerCase() );
+  const _api = {
+    detect( text ) {
+      const resolver    = P.pending();
+      const searchable  = S( text.toLowerCase() );
 
-      async.detect( _badWords, detectWord, function ( result ) {
+      async.detect( _badWords, detectWord, ( result ) => {
         if ( result ) {
           resolver.resolve( true );
         } else {
@@ -32,20 +32,19 @@ module.exports = function( opts ) {
       function detectWord( word, callback ) {
         var contains = searchable.contains( word.toLowerCase() );
         if ( contains === true ) {
-          console.log( 'Contains \'%s\'', word );
+          console.log( `Contains ${word}` );
         }
         return callback( contains );
       }
       return resolver.promise;
     },
 
-    allow: function( words ) {
+    allow( words ) {
       words         = ( check.array( words ) ) ? words : [ words ];
-      var resolver  = P.pending();
-      var index;
-      var i;
+      const resolver  = P.pending();
+      let   index;
 
-      for ( i = 0; i < words.length; i++ ) {
+      for ( let i = 0; i < words.length; i++ ) {
         index = _badWords.indexOf( words[ i ] );
         if ( index > -1 ) {
           _badWords.splice( index, 1 );
@@ -53,73 +52,69 @@ module.exports = function( opts ) {
       }
 
       utils.persistWords( _badWords )
-        .then( function() {
-          resolver.resolve();
-        }).catch( function ( err ) {
-          resolver.reject( err );
-        });
+        .then( () => resolver.resolve() )
+        .catch( ( err ) => resolver.reject( err ) );
 
       return resolver.promise;
     },
 
     forbid: function( words ) {
-      words    = ( check.array( words ) ) ? words : [ words ];
-      var resolver = P.pending();
-      var index;
-      var i;
+      words           = ( check.array( words ) ) ? words : [ words ];
+      const resolver  = P.pending();
 
-      for ( i = 0; i < words.length; i++ ) {
-        index = _badWords.indexOf( words[ i ] );
+      for ( let i = 0; i < words.length; i++ ) {
+        let index = _badWords.indexOf( words[ i ] );
         if ( index === -1 ) {
           _badWords.push( words[ i ] );
         }
       }
 
       utils.persistWords( _badWords )
-        .then( function() {
+        .then( () => {
           resolver.resolve();
-        }).catch( function ( err ) {
+        }).catch( ( err ) => {
           resolver.reject( err );
         });
 
       return resolver.promise;
     },
 
-    useDefaults: function() {
-      var resolver = P.pending();
-      var defaults = utils.fetchDefaultWords();
+    useDefaults() {
+      const resolver = P.pending();
+      const defaults = utils.fetchDefaultWords();
+
       _badWords = defaults;
+
       utils.persistWords( _badWords )
-        .then( function () {
+        .then( () => {
           resolver.resolve();
-        }).catch( function ( err ) {
+        }).catch( ( err ) => {
           resolver.reject( err );
         });
+
       return resolver.promise;
     },
 
-    fetchForbidden: function() {
+    fetchForbidden() {
       return _badWords;
     }
   };
 
   utils.fetchStoredWords()
-    .then( function ( badWords ) {
+    .then( ( badWords ) => {
       if ( badWords ) {
         _badWords = badWords;
-        _initResolver.resolve( _api );
+        _initResolver.resolve( Object.create( _api ) );
       } else {
         _badWords = utils.fetchDefaultWords();
         utils.persistWords( _badWords )
-          .then( function () {
-            _initResolver.resolve( _api );
-          }).catch( function ( err ) {
+          .then( () => {
+            _initResolver.resolve( Object.create( _api ) );
+          }).catch( ( err ) => {
             _initResolver.reject( err );
           });
       }
-    }).catch( function ( err ) {
-      _initResolver.reject( err );
-    });
+    }).catch( ( err ) => _initResolver.reject( err ) );
 
   return _initResolver.promise;
 };

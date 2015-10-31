@@ -11,24 +11,24 @@ ISL takes no position on the usage/context of the list provided. We provide the 
 ### Quick Start
 ```javascript
   // mr rogers uses a posgtres backed store
-  var profanity = require( 'mr-rogers' );
-  var kevinJohnson = require( 'kevin-johnson' );
-  var clean = 'some clean text';
-  var dirty = 'some dirty ass text';
-  var mrRogers;
+  const profanity = require( 'mr-rogers' );
+  const kevinJohnson = require( 'kevin-johnson' );
+  const clean = 'some clean text';
+  const dirty = 'some dirty ass text';
+  let   mrRogers;
 
   kevinJohnson()
-    .then( function ( kj ) {
+    .then( ( kj ) => {
         return profanity( { kevinJohnson: kj } );
-    }).then( function ( m ) {
+    }).then( ( m ) => {
         mrRogers = m;
         return mrRogers.detect( clean );
-    }).then( function ( hasProfanity ) {
+    }).then( ( hasProfanity ) => {
         console.log(hasProfanity); // false
         return mrRogers.detect( dirty );
-    }).then( function ( hasProfanity ) {
+    }).then( ( hasProfanity ) => {
         console.log(hasProfanity); // true
-    });
+    }).catch( ( err ) => console.error('oh no') );
 
   // you can add or remove to the list dynamically using allow and forbid
   mrRogers.allow( 'badword' ).then( ... );

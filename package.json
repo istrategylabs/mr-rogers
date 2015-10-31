@@ -1,6 +1,6 @@
 {
   "name": "mr-rogers",
-  "version": "0.0.9",
+  "version": "0.2.0",
   "description": "Profanity filter",
   "main": "index.js",
   "scripts": {
@@ -31,5 +31,9 @@
   "devDependencies": {
     "kevin-johnson": "^0.1.2",
     "tape": "^4.2.0"
+  },
+  "engineStrict": true,
+  "engines" : {
+    "node" : "^4.2.1"
   }
 }
