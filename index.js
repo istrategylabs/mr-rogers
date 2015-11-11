@@ -19,22 +19,26 @@ module.exports = ( opts ) => {
   const _api = {
     detect( text ) {
       const resolver    = P.pending();
-      const searchable  = S( text.toLowerCase() );
+      if ( text ) {
+        const searchable  = S( text.toLowerCase() );
 
-      async.detect( _badWords, detectWord, ( result ) => {
-        if ( result ) {
-          resolver.resolve( true );
-        } else {
-          resolver.resolve( false );
-        }
-      });
+        async.detect( _badWords, detectWord, ( result ) => {
+          if ( result ) {
+            resolver.resolve( true );
+          } else {
+            resolver.resolve( false );
+          }
+        });
 
-      function detectWord( word, callback ) {
-        var contains = searchable.contains( word.toLowerCase() );
-        if ( contains === true ) {
-          console.log( `Contains ${word}` );
+        function detectWord( word, callback ) {
+          var contains = searchable.contains( word.toLowerCase() );
+          if ( contains === true ) {
+            console.log( `Contains ${word}` );
+          }
+          return callback( contains );
         }
-        return callback( contains );
+      } else {
+        resolver.resolve( false );
       }
       return resolver.promise;
     },
