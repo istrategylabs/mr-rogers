@@ -3,7 +3,6 @@
 
 const P     = require( 'bluebird' );
 const async = require( 'async' );
-const S     = require( 'string' );
 const check = require( 'check-types' );
 let utils;
 
@@ -19,9 +18,9 @@ module.exports = ( opts ) => {
   const _api = {
     detect( text ) {
       const resolver    = P.pending();
-      if ( text ) {
-        const searchable  = S( text.toLowerCase() );
 
+      if ( text ) {
+        const searchable  = text.toLowerCase();
         async.detect( _badWords, detectWord, ( result ) => {
           if ( result ) {
             resolver.resolve( true );
@@ -31,7 +30,9 @@ module.exports = ( opts ) => {
         });
 
         function detectWord( word, callback ) {
-          var contains = searchable.contains( word.toLowerCase() );
+          const key   = word.toLowerCase().trim();
+          const regex = new RegExp( `(\\s|^)${key}(\\s|$|\\W|\\d|_|-)` );
+          var contains = regex.test( searchable );
           if ( contains === true ) {
             console.log( `Contains ${word}` );
           }

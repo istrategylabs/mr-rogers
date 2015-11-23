@@ -90,6 +90,60 @@ test('allow a dirty word', ( t ) => {
     });
 });
 
+test('do not detect pattern within words', ( t ) => {
+  const text = 'Here is some dirtyfuckingtext';
+  let   mrRogers;
+
+  ctx( opts )
+    .then( ( kj ) => {
+      return profanity( { kevinJohnson: kj } );
+    }).then( ( m ) => {
+      mrRogers = m;
+      return mrRogers.useDefaults();
+    }).then( () => {
+      return mrRogers.detect( text );
+    }).then( ( hasProfanity ) => {
+      t.equal( hasProfanity, false );
+      t.end();
+    }).catch( errorFunc );
+});
+
+test('detect pattern at the beginning of a string', ( t ) => {
+  const text = 'ass Here is some';
+  let   mrRogers;
+
+  ctx( opts )
+    .then( ( kj ) => {
+      return profanity( { kevinJohnson: kj } );
+    }).then( ( m ) => {
+      mrRogers = m;
+      return mrRogers.useDefaults();
+    }).then( () => {
+      return mrRogers.detect( text );
+    }).then( ( hasProfanity ) => {
+      t.equal( hasProfanity, true );
+      t.end();
+    }).catch( errorFunc );
+});
+
+test('detect pattern at the end of a string', ( t ) => {
+  const text = 'Here is the word shit.';
+  let   mrRogers;
+
+  ctx( opts )
+    .then( ( kj ) => {
+      return profanity( { kevinJohnson: kj } );
+    }).then( ( m ) => {
+      mrRogers = m;
+      return mrRogers.useDefaults();
+    }).then( () => {
+      return mrRogers.detect( text );
+    }).then( ( hasProfanity ) => {
+      t.equal( hasProfanity, true );
+      t.end();
+    }).catch( errorFunc );
+});
+
 test('cleanup', ( t ) => {
   t.end();
   process.exit();
