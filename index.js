@@ -1,84 +1,85 @@
 
 'use strict';
 
-const P     = require( 'bluebird' );
-const async = require( 'async' );
-const check = require( 'check-types' );
+const P = require('bluebird');
+const component = require('stampit');
+const async = require('async');
+const check = require('check-types');
 let utils;
 
-module.exports = ( opts ) => {
+module.exports = (opts) => {
   opts = opts || {};
   const _initResolver = P.pending();
   let   _badWords     = opts.badWords;
   const kj            = opts.kevinJohnson;
   const key           = opts.key = 'mr_rogers_banned';
 
-  utils = require( './lib/utils' )( kj, key );
+  utils = require('./lib/utils')(kj, key);
 
   const _api = {
-    detect( text ) {
+    detect(text) {
       const resolver    = P.pending();
 
-      if ( text ) {
+      if (text) {
         const searchable  = text.toLowerCase();
-        async.detect( _badWords, detectWord, ( result ) => {
-          if ( result ) {
-            resolver.resolve( true );
+        async.detect(_badWords, detectWord, (result) => {
+          if (result) {
+            resolver.resolve(true);
           } else {
-            resolver.resolve( false );
+            resolver.resolve(false);
           }
         });
 
-        function detectWord( word, callback ) {
+        function detectWord(word, callback) {
           const key   = word.toLowerCase().trim();
-          const regex = new RegExp( `(\\s|^)${key}(\\s|$|\\W|\\d|_|-)` );
-          var contains = regex.test( searchable );
-          if ( contains === true ) {
-            console.log( `Contains ${word}` );
+          const regex = new RegExp(`(\\s|^)${key}(\\s|$|\\W|\\d|_|-)`);
+          var contains = regex.test(searchable);
+          if (contains === true) {
+            console.log(`Contains ${word}`);
           }
-          return callback( contains );
+          return callback(contains);
         }
       } else {
-        resolver.resolve( false );
+        resolver.resolve(false);
       }
       return resolver.promise;
     },
 
-    allow( words ) {
-      words         = ( check.array( words ) ) ? words : [ words ];
+    allow(words) {
+      words         = (check.array(words)) ? words : [ words ];
       const resolver  = P.pending();
       let   index;
 
-      for ( let i = 0; i < words.length; i++ ) {
-        index = _badWords.indexOf( words[ i ] );
-        if ( index > -1 ) {
-          _badWords.splice( index, 1 );
+      for (let i = 0; i < words.length; i++) {
+        index = _badWords.indexOf(words[ i ]);
+        if (index > -1) {
+          _badWords.splice(index, 1);
         }
       }
 
-      utils.persistWords( _badWords )
-        .then( () => resolver.resolve() )
-        .catch( ( err ) => resolver.reject( err ) );
+      utils.persistWords(_badWords)
+        .then(() => resolver.resolve())
+        .catch((err) => resolver.reject(err));
 
       return resolver.promise;
     },
 
-    forbid: function( words ) {
-      words           = ( check.array( words ) ) ? words : [ words ];
+    forbid: function(words) {
+      words           = (check.array(words)) ? words : [ words ];
       const resolver  = P.pending();
 
-      for ( let i = 0; i < words.length; i++ ) {
-        let index = _badWords.indexOf( words[ i ] );
-        if ( index === -1 ) {
-          _badWords.push( words[ i ] );
+      for (let i = 0; i < words.length; i++) {
+        let index = _badWords.indexOf(words[ i ]);
+        if (index === -1) {
+          _badWords.push(words[ i ]);
         }
       }
 
-      utils.persistWords( _badWords )
-        .then( () => {
+      utils.persistWords(_badWords)
+        .then(() => {
           resolver.resolve();
-        }).catch( ( err ) => {
-          resolver.reject( err );
+        }).catch((err) => {
+          resolver.reject(err);
         });
 
       return resolver.promise;
@@ -90,11 +91,11 @@ module.exports = ( opts ) => {
 
       _badWords = defaults;
 
-      utils.persistWords( _badWords )
-        .then( () => {
+      utils.persistWords(_badWords)
+        .then(() => {
           resolver.resolve();
-        }).catch( ( err ) => {
-          resolver.reject( err );
+        }).catch((err) => {
+          resolver.reject(err);
         });
 
       return resolver.promise;
@@ -106,20 +107,20 @@ module.exports = ( opts ) => {
   };
 
   utils.fetchStoredWords()
-    .then( ( badWords ) => {
-      if ( badWords ) {
+    .then((badWords) => {
+      if (badWords) {
         _badWords = badWords;
-        _initResolver.resolve( Object.create( _api ) );
+        _initResolver.resolve(Object.create(_api));
       } else {
         _badWords = utils.fetchDefaultWords();
-        utils.persistWords( _badWords )
-          .then( () => {
-            _initResolver.resolve( Object.create( _api ) );
-          }).catch( ( err ) => {
-            _initResolver.reject( err );
+        utils.persistWords(_badWords)
+          .then(() => {
+            _initResolver.resolve(Object.create(_api));
+          }).catch((err) => {
+            _initResolver.reject(err);
           });
       }
-    }).catch( ( err ) => _initResolver.reject( err ) );
+    }).catch((err) => _initResolver.reject(err));
 
   return _initResolver.promise;
 };
