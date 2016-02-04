@@ -10,6 +10,7 @@ const utilFact = require('./lib/utils');
 module.exports = (spec) => {
   return component()
     .init(function() {
+      spec = spec || {};
       const resolver = P.pending();
       const self = this;
       this._badWords = spec.badWords;

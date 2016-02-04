@@ -11,41 +11,43 @@ ISL takes no position on the usage/context of the list provided. We provide the 
 ### Quick Start
 ```javascript
   // mr rogers uses a posgtres backed store
-  const profanity = require( 'mr-rogers' );
-  const kevinJohnson = require( 'kevin-johnson' );
+  const MrRogers = require('mr-rogers');
   const clean = 'some clean text';
   const dirty = 'some dirty ass text';
-  let   mrRogers;
+  let mrRogers;
 
-  kevinJohnson()
-    .then( ( kj ) => {
-        return profanity( { kevinJohnson: kj } );
-    }).then( ( m ) => {
+  MrRogers()
+    .then((m) => {
         mrRogers = m;
-        return mrRogers.detect( clean );
-    }).then( ( hasProfanity ) => {
+        return mrRogers.detect(clean);
+    }).then((hasProfanity) => {
         console.log(hasProfanity); // false
-        return mrRogers.detect( dirty );
-    }).then( ( hasProfanity ) => {
+        return mrRogers.detect(dirty);
+    }).then((hasProfanity) => {
         console.log(hasProfanity); // true
-    }).catch( ( err ) => console.error('oh no') );
+    }).catch((err) => console.error('oh no'));
 
   // you can add or remove to the list dynamically using allow and forbid
-  mrRogers.allow( 'badword' ).then( ... );
-  mrRogers.forbid( 'candy' ).then( ... );
+  mrRogers.allow('badword').then(...);
+  mrRogers.forbid('candy').then(...);
 
   // you can always revert back to the original list (careful, you'll lose all previously made changes)
-  mrRogers.useDefaults().then( ... );
+  mrRogers.useDefaults().then(...);
 
 ```
 
-Tests
+### Tests
 
 In order to test all functionality you'll need postres running. Create the appropriate user and database:
-
 ```
 createuser mr_rogers_test
 createdb mr_rogers_test
+```
+
+Create some test environment variables
+```
+$ echo "APP_NAME=mr_rogers_test" >> test/test.env
+$ echo "DATABASE_URL=postgres://mr_rogers_test:dbpass@localhost:5432/mr_rogers_test" >> test/test.env
 ```
 
 Then run the test suite
