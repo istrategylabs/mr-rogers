@@ -5,122 +5,148 @@ const P = require('bluebird');
 const component = require('stampit');
 const async = require('async');
 const check = require('check-types');
-let utils;
+const utilFact = require('./lib/utils');
 
-module.exports = (opts) => {
-  opts = opts || {};
-  const _initResolver = P.pending();
-  let   _badWords     = opts.badWords;
-  const kj            = opts.kevinJohnson;
-  const key           = opts.key = 'mr_rogers_banned';
-
-  utils = require('./lib/utils')(kj, key);
-
-  const _api = {
-    detect(text) {
-      const resolver    = P.pending();
-
-      if (text) {
-        const searchable  = text.toLowerCase();
-        async.detect(_badWords, detectWord, (result) => {
-          if (result) {
-            resolver.resolve(true);
-          } else {
-            resolver.resolve(false);
-          }
-        });
-
-        function detectWord(word, callback) {
-          const key   = word.toLowerCase().trim();
-          const regex = new RegExp(`(\\s|^)${key}(\\s|$|\\W|\\d|_|-)`);
-          var contains = regex.test(searchable);
-          if (contains === true) {
-            console.log(`Contains ${word}`);
-          }
-          return callback(contains);
-        }
-      } else {
-        resolver.resolve(false);
-      }
-      return resolver.promise;
-    },
-
-    allow(words) {
-      words         = (check.array(words)) ? words : [ words ];
-      const resolver  = P.pending();
-      let   index;
-
-      for (let i = 0; i < words.length; i++) {
-        index = _badWords.indexOf(words[ i ]);
-        if (index > -1) {
-          _badWords.splice(index, 1);
-        }
-      }
-
-      utils.persistWords(_badWords)
-        .then(() => resolver.resolve())
-        .catch((err) => resolver.reject(err));
-
-      return resolver.promise;
-    },
-
-    forbid: function(words) {
-      words           = (check.array(words)) ? words : [ words ];
-      const resolver  = P.pending();
-
-      for (let i = 0; i < words.length; i++) {
-        let index = _badWords.indexOf(words[ i ]);
-        if (index === -1) {
-          _badWords.push(words[ i ]);
-        }
-      }
-
-      utils.persistWords(_badWords)
-        .then(() => {
-          resolver.resolve();
-        }).catch((err) => {
-          resolver.reject(err);
-        });
-
-      return resolver.promise;
-    },
-
-    useDefaults() {
+module.exports = (spec) => {
+  return component()
+    .init(function() {
       const resolver = P.pending();
-      const defaults = utils.fetchDefaultWords();
+      const self = this;
+      this._badWords = spec.badWords;
+      /**
+       * @deprecated the kevinJohnson key is deprecated in favor of store
+       */
+      this._kj = spec.kevinJohnson;
+      this._store = this._kj || spec.store;
+      this._key = spec.key || 'mr_rogers_banned';
+      this._utils = utilFact(this._store, this._key);
 
-      _badWords = defaults;
+      this._utils.fetchStoredWords()
+        .then((badWords) => {
+          if (badWords) {
+            self._badWords = badWords;
+            resolver.resolve(self);
+          } else {
+            self._badWords = self._utils.fetchDefaultWords();
+            self._utils.persistWords(self._badWords)
+              .then(() => resolver.resolve(self))
+              .catch((err) => esolver.reject(err));
+          }
+        }).catch((err) => resolver.reject(err));
+      return resolver.promise;
+    }).methods({
 
-      utils.persistWords(_badWords)
-        .then(() => {
-          resolver.resolve();
-        }).catch((err) => {
-          resolver.reject(err);
+      /**
+       * Determines if the given text contains a restricted word
+       *
+       * @param  {String} text The text to search
+       * @return {Promise}
+       */
+      detect(text) {
+        const self = this;
+        const resolver = P.pending();
+
+        if (text) {
+          const searchable = text.toLowerCase();
+          async.detect(self._badWords, detectWord, (result) => {
+            if (result) {
+              resolver.resolve(true);
+            } else {
+              resolver.resolve(false);
+            }
+          });
+
+          function detectWord(word, callback) {
+            const key = word.toLowerCase().trim();
+            const regex = new RegExp(`(\\s|^)${key}(\\s|$|\\W|\\d|_|-)`);
+            var contains = regex.test(searchable);
+            if (contains === true) {
+              console.log(`Contains ${word}`);
+            }
+            return callback(contains);
+          }
+        } else {
+          resolver.resolve(false);
+        }
+        return resolver.promise;
+      },
+
+      /**
+       * Allows a word to appear in subsequent detection attempts
+       *
+       * @param  {Array} words An array of words to be whitelisted
+       * @return {Promise}
+       */
+      allow(words) {
+        words = (check.array(words)) ? words : [ words ];
+        const self = this;
+        const resolver = P.pending();
+        let index;
+
+        words.forEach((word, i) => {
+          let index = self._badWords.indexOf(word);
+          if (index > -1) {
+            self._badWords.splice(word);
+          }
         });
 
-      return resolver.promise;
-    },
+        this._utils.persistWords(self._badWords)
+          .then(() => resolver.resolve())
+          .catch((err) => resolver.reject(err));
 
-    fetchForbidden() {
-      return _badWords;
-    }
-  };
+        return resolver.promise;
+      },
 
-  utils.fetchStoredWords()
-    .then((badWords) => {
-      if (badWords) {
-        _badWords = badWords;
-        _initResolver.resolve(Object.create(_api));
-      } else {
-        _badWords = utils.fetchDefaultWords();
-        utils.persistWords(_badWords)
-          .then(() => {
-            _initResolver.resolve(Object.create(_api));
-          }).catch((err) => {
-            _initResolver.reject(err);
-          });
+      /**
+       * Forbids an otherwise, clean word from appearing in subsequent detection attempts
+       *
+       * @param  {Array} words An array of words to be blacklisted
+       * @return {Promise}
+       */
+      forbid(words) {
+        words = (check.array(words)) ? words : [ words ];
+        const self = this;
+        const resolver = P.pending();
+
+        words.forEach((word) => {
+          let index = self._badWords.indexOf(word);
+          if (index === -1) {
+            self._badWords.push(word);
+          }
+        });
+
+        this._utils.persistWords(self._badWords)
+          .then(() => resolver.resolve())
+          .catch((err) => resolver.reject(err));
+
+        return resolver.promise;
+      },
+
+      /**
+       * Utilize the default set of words for subsequent detection operations
+       *
+       * @return {Promise}
+       */
+      useDefaults() {
+        const resolver = P.pending();
+        const defaults = this._utils.fetchDefaultWords();
+
+        this._badWords = defaults;
+
+        this._utils.persistWords(this._badWords)
+          .then(() => resolver.resolve())
+          .catch((err) => resolver.reject(err));
+
+        return resolver.promise;
+      },
+
+      /**
+       * Returns a list of all the currently blacklisted words
+       *
+       * @return {Array} badWords An array of the blacklisted words
+       */
+      fetchForbidden() {
+        return this._badWords;
       }
-    }).catch((err) => _initResolver.reject(err));
-
-  return _initResolver.promise;
-};
+    }).create();
+}
