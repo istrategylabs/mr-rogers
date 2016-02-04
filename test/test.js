@@ -125,7 +125,3 @@ test('detect pattern at the end of a string', (t) => {
   .catch((err) => console.error(err));
 });
 
-// test('cleanup', (t) => {
-//   t.end();
-//   process.exit();
-// });
