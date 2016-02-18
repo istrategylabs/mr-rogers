@@ -125,3 +125,23 @@ test('detect pattern at the end of a string', (t) => {
   .catch((err) => console.error(err));
 });
 
+test('fetch default words', (t) => {
+  co(function*() {
+    const store = yield Store(opts);
+    const mrRogers = yield MrRogers({ store });
+    yield mrRogers.useDefaults();
+    let defaultsLen = mrRogers.fetchDefaults().length;
+    yield mrRogers.forbid([ 'beep' ]);
+    let forbiddenLen = mrRogers.fetchForbidden().length;
+    t.equal(defaultsLen, (forbiddenLen - 1), 'Default length is 1 less than forbidden');
+    let foundIndex = mrRogers.fetchDefaults().indexOf('beep');
+    t.equal(foundIndex, -1, 'the new word is NOT part of the defaults');
+    foundIndex = mrRogers.fetchForbidden().indexOf('beep');
+    console.log(foundIndex)
+    t.equal((foundIndex > -1), true, 'the new word IS part of the current blacklist');
+    yield store.destroy();
+    t.end();
+  })
+  .catch((err) => console.error(err));
+});
+

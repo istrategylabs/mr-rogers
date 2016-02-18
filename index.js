@@ -14,11 +14,7 @@ module.exports = (spec) => {
       const resolver = P.pending();
       const self = this;
       this._badWords = spec.badWords;
-      /**
-       * @deprecated the kevinJohnson key is deprecated in favor of store
-       */
-      this._kj = spec.kevinJohnson;
-      this._store = this._kj || spec.store;
+      this._store = spec.store;
       this._key = spec.key || 'mr_rogers_banned';
       this._utils = utilFact(this._store, this._key);
 
@@ -139,6 +135,10 @@ module.exports = (spec) => {
           .catch((err) => resolver.reject(err));
 
         return resolver.promise;
+      },
+
+      fetchDefaults() {
+        return this._utils.fetchDefaultWords();
       },
 
       /**
